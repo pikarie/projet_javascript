@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		<link rel="stylesheet" type="text/css" href="styles/styleCaisse2blanc.css" id="styles"/>
+		<title>Caisse enregistreuse</title>
+		<script type="text/javascript">
+			var totalunique = 0
+			var combienPoint = 0;
+			var tour2 = 0;
+			var monArrayItems = ["Potato","Banana","Choucoulat"];
+			var monArrayPrix = ["2.00$","1.50$","4.30$"];
+			var monArrayConcat = new Array();
+			var monSoustotal = 0;
+			var numbOfRow = 1;
+			var blanc = 1;
+			
+			for(var i = 0; i < (monArrayItems).length; i++){
+				monArrayConcat[i] = monArrayPrix[i] + ' ' + monArrayItems[i];
+			}
+			
+			function peuplerLstBox(monArrayBidon,monListBox,indexSelected){ //array, listBox, indexSelectionné optionnelle
+				indexSelected = (typeof indexSelected != "undefined") ? indexSelected:0; //gauche = si true, droite = si false
+				/*if (typeof indexSelected != "undefined"){
+				indexSelected = indexSelected;
+				}else{
+					indexSelected = 0;
+				}*/
+				
+				if(monArrayBidon.length > 0){ //qlque chose dans l'array
+					monListBox.add(new Option("-Sélectionnez un item-",0));
+					
+					for(var i=0; i<monArrayBidon.length; i++){
+						if(indexSelected > 0){
+							if(i == indexSelected){
+								monListBox.add(new Option(monArrayBidon[i],i+1,true)); //le true met en sélectionne
+							}else{
+								monListBox.add(new Option(monArrayBidon[i],i+1));
+							}
+						}else{
+							monListBox.add(new Option(monArrayBidon[i],i+1));
+						}
+					}
+				}
+			}
+			
+			function init_page(){
+				peuplerLstBox(monArrayConcat, document.frm1.lstNoms, 0);
+			}
+
+			//celon l'index sélectionner, les arrays vont dans les txtbox correspondant
+			function lstNomsChange(ele){
+				//merci à Natalie pour m'avoir aider(nom de fonction pareille au id et name; nom valide)
+				var value = ele.options[ele.selectedIndex].value;
+				if(ele.selectedIndex !== 0){
+					document.getElementById("description").value = monArrayItems[value - 1];
+					document.getElementById("quantite").value = 1;
+					document.getElementById("prix").value = monArrayPrix[value - 1];
+				}else{
+					document.getElementById("description").value = '';
+					document.getElementById("quantite").value = 0;
+					document.getElementById("prix").value = 0;
+				}
+			}
+			
+			function btn_click(element){
+				if(document.getElementById("txtbox").value == 0 && document.getElementById("txtbox").value.length !== 2){
+					document.getElementById("txtbox").value = element.value;
+				}else{
+					document.getElementById("txtbox").value += element.value;
+				}
+			}
+			
+			function btnReset_click(){
+				document.getElementById("txtbox").value = 0;
+				document.getElementById("description").value = '';
+				document.getElementById("quantite").value = 0;
+				document.getElementById("prix").value = 0;
+				combienPoint = 0;
+				tour2 = 0;
+				//reset le combobox afficher
+				lstNoms.selectedIndex = 0;
+			}
+			
+			function btnQuantite_click(){
+				document.getElementById("quantite").value = Math.floor(document.getElementById("txtbox").value);
+				document.getElementById("txtbox").value = 0;
+				combienPoint = 0;
+				tour2 = 0;
+			}
+			
+			function btnPrix_click(){
+				var monTxt = parseFloat(document.getElementById("txtbox").value);
+				document.getElementById("prix").value = monTxt.toFixed(2) + '$';
+				document.getElementById("txtbox").value = 0;
+				combienPoint = 0;
+				tour2 = 0;
+			}
+			
+			function btnPoint_click(){
+				var txt = document.getElementById("txtbox").value;
+				
+				for (var i = 0; i < txt.length; i++){
+					console.log(txt.length);
+				
+					if(txt[i] == '.'){
+						combienPoint = 1
+					}
+					if(combienPoint >0){
+							//ne rajoute pas de 2e point, fait rien
+					}else if (tour2 == 0){
+						//0 point
+						document.getElementById("txtbox").value += '.';
+						tour2 = 1;
+					}
+				}
+			}
+			
+			function addTr_click(){
+			
+				if(document.getElementById("description").value !== '' && document.getElementById("quantite").value !== '0' && document.getElementById("prix").value !== '0' && document.getElementById("prix").value !== '0.00$'){
+					var table = document.getElementById("tableItems");
+					
+					var combienTr = table.rows.length;
+					var row = table.insertRow(-1);
+					var cell1 = row.insertCell(0);
+					var cell2 = row.insertCell(1);
+					var cell3 = row.insertCell(2);
+					var cell4 = row.insertCell(3);
+					
+					var desc = document.getElementById("description").value
+					var quan = document.getElementById("quantite").value
+					var pri = document.getElementById("prix").value
+					
+					cell1.innerHTML = desc;
+					cell2.innerHTML = quan;
+					cell3.innerHTML = pri;
+					var soustot = (quan * (pri.substring(0,pri.length-1)));
+					
+					//pour réutiliser le sous-total + tard
+					monSoustotal += soustot;
+					cell4.innerHTML = soustot.toFixed(2) + '$';
+
+					//donné utilisé pour le bouton de reset facture
+					numbOfRow +=1
+					
+					if(totalunique == 0){
+						totalEndTable()
+						totalunique +=1;
+					}
+					
+					
+					
+					//(dans le css)document.getElementById("celltotal").setAttribute("style", "color: yellow;");
+					//code qui actualise la TPS, TVQ et le Total une fois qu'ils sont créer!
+					document.getElementById("cellsanstaxe").innerHTML = (monSoustotal).toFixed(2)+'$';
+					document.getElementById("celltps").innerHTML = (0.05 * monSoustotal).toFixed(2)+'$';
+					document.getElementById("celltvq").innerHTML = (0.09975 * monSoustotal).toFixed(2)+'$';
+					document.getElementById("celltotal").innerHTML = (monSoustotal + (0.05 * monSoustotal) + (0.09975 * monSoustotal)).toFixed(2)+'$';
+					
+					//reset le combobox afficher
+					lstNoms.selectedIndex = 0;
+				}
+			}
+			
+			function totalEndTable(){
+				var table = document.getElementById("tabletotal");
+				
+				var desc = document.getElementById("description").value
+				var quan = document.getElementById("quantite").value
+				var pri = document.getElementById("prix").value
+				
+				//rangée de sous-total sans taxe
+				var rowSanstaxe = table.insertRow();
+				var cel1 = rowSanstaxe.insertCell();
+				var cel2 = rowSanstaxe.insertCell();
+				var cel3 = rowSanstaxe.insertCell();
+				var cel4 = rowSanstaxe.insertCell();
+				cel4.setAttribute("id","cellsanstaxe");
+				
+				cel3.innerHTML = 'Sous-total';
+				cel4.innerHMTL = monSoustotal;
+			
+				//rangée de la TPS
+				var rowTps = table.insertRow();
+				var cell5 = rowTps.insertCell();
+				var cell6 = rowTps.insertCell();
+				var cell7 = rowTps.insertCell();
+				var cell8 = rowTps.insertCell();
+				cell8.setAttribute("id","celltps");
+				
+				cell7.innerHTML = 'TPS';
+				var tps = 0;
+				tps = (0.05 * monSoustotal);
+				cell8.innerHTML = tps.toFixed(2)+'$';
+				
+				//rangée de la TVQ
+				var rowTvq = table.insertRow(-1);
+				var cell9 = rowTvq.insertCell();
+				var cell10 = rowTvq.insertCell();
+				var cell11 = rowTvq.insertCell();
+				var cell12 = rowTvq.insertCell();
+				cell12.setAttribute("id","celltvq");
+				
+				cell11.innerHTML = "TVQ";
+				var tvq = 0;
+				tvq = (0.09975 * monSoustotal);
+				cell12.innerHTML = tvq.toFixed(2)+'$';
+				
+				//rangée du Total
+				var rowTvq = table.insertRow(-1);
+				var cell13 = rowTvq.insertCell();
+				var cell14 = rowTvq.insertCell();
+				var cell15 = rowTvq.insertCell();
+				var cell16 = rowTvq.insertCell();
+				cell16.setAttribute("id","celltotal");
+
+				cell15.innerHTML = 'TOTAL';
+				
+				cell16.innerHTML = ((tps + tvq) + parseFloat(monSoustotal)).toFixed(2)+'$';
+				/*
+				console.log('math.round soustot = ' + parseFloat(soustot));
+				console.log(typeof parseFloat(soustot));
+				console.log('tps = ' + tps);
+				console.log('tvq = ' + tvq);
+				console.log('soustot = ' + soustot);
+				console.log('tps + tvq = ' + (tps + tvq));
+				console.log('tps + tvq tofixed = ' + (tps + tvq).toFixed(2));
+				console.log(typeof parseInt(soustot));
+				*/
+				
+				/*
+				console.log('ceci est le soustot = ' + soustot);
+				cell16.innerHTML = ((parseFloat(tps).toFixed(2)) + (parseFloat(soustot).toFixed(2)));
+				console.log('total = ' + (parseFloat(tps).toFixed(2)));
+				console.log('total2 = '+ (parseFloat(soustot).toFixed(2)));
+				*/
+			}
+			
+			function btnResetFacture_click(){
+				location.href = "index.html";
+				
+				//reset le combobox afficher
+				lstNoms.selectedIndex = 0;
+				
+				/*
+				var table = document.getElementById("tabletotal");
+				var tableitems = document.getElementById("tableItems")
+				
+				if(table){
+					table.parentNode.removeChild(table);
+					//tableitems.parentNode.removeChild(tableitems);
+					for(var i = 1; i < (numbOfRow + 1); i++){
+						document.getElementById("tableItems").deleteRow([i]);
+					}
+					
+				}
+				*/
+			}
+			function btnChangerStyle_click(){
+				//Yéé =D ça marche =)))
+				switch(blanc)
+				{
+				case 1:
+					//alert("blanc");
+					document.getElementById('styles').setAttribute('href','styles/styleCaisse1brun.css');
+					blanc = 0;
+				break;
+				case 0:
+					//alert("brun");
+					document.getElementById('styles').setAttribute('href','styles/styleCaisse2blanc.css');
+					blanc = 1;
+				break;
+				}
+			}
+	
+		</script>
+	</head>
+	<body id="myBody"onload="init_page()">
+		<div id="wrapper">
+			<div id="contenu">
+				<div id="caisse">
+					<form name="frm1" action="" method="post">
+						<table id="maTable">
+							<tr>
+								<th>
+									Items
+								</th>
+								<th>
+									Description
+								</th>
+								<th>
+									Quantité
+								</th>
+								<th>
+									Prix unitaire
+								</th>
+							</tr>
+							<tr>
+								<td>
+									<select name="lstNoms" id="lstNoms" size="1" onchange="lstNomsChange(this)" /></select> 
+								</td>
+								<td>
+									<input type="text" class="txt" id="description" name="description" value="" />
+								</td>
+								<td>
+									<input type="text" class="txt" id="quantite" name="quantite" value="0" readonly />
+								</td>
+								<td>
+									<input type="text" class="txt" id="prix" name="prix" value="0" readonly />
+								</td>
+							</tr>
+							<tr>
+								<td>
+									&nbsp;
+								</td>
+								<td>
+									<input type="button" class="btnNo" id="btn7" name="btn7" value="7" onclick="btn_click(this)" />
+								</td>
+								<td>
+									<input type="button" class="btnNo" id="btn8" name="btn8" value="8" onclick="btn_click(this)" />
+								</td>
+								<td>
+									<input type="button" class="btnNo" id="btn9" name="btn9" value="9" onclick="btn_click(this)" />
+								</td>
+							</tr>
+							<tr>
+								<td>
+									&nbsp;
+								</td>
+								<td>
+									<input type="button" class="btnNo" id="btn4" name="btn4" value="4" onclick="btn_click(this)" />
+								</td>
+								<td>
+									<input type="button" class="btnNo" id="btn5" name="btn5" value="5" onclick="btn_click(this)" />
+								</td>
+								<td>
+									<input type="button" class="btnNo" id="btn6" name="btn6" value="6" onclick="btn_click(this)" />
+								</td>
+							</tr>
+							<tr>
+								<td>
+									&nbsp;
+								</td>
+								<td>
+									<input type="button" class="btnNo" id="btn1" name="btn1" value="1" onclick="btn_click(this)" />
+								</td>
+								<td>
+									<input type="button" class="btnNo" id="btn2" name="btn2" value="2" onclick="btn_click(this)" />
+								</td>
+								<td>
+									<input type="button" class="btnNo" id="btn3" name="btn3" value="3" onclick="btn_click(this)" />
+								</td>
+							</tr>
+							<tr>
+								<td>
+									&nbsp;
+								</td>
+								<td colspan="2">
+									<input type="button" class="btnNo" id="btn0" name="btn0" value="0" onclick="btn_click(this)" />
+								</td>
+								<td>
+									<input type="button" class="btnAction" id="btnPoint" name="btnPoint" value="." onclick="btnPoint_click()" />
+								</td>
+							</tr>
+							<tr>
+								<td>
+									&nbsp;
+								</td>
+								<td>
+									<input type="button" class="btnAction" id="btnQuantite" name="btnQuantite" value="Quantité" onclick="btnQuantite_click()" />
+								</td>
+								<td>
+									<input type="button" class="btnAction" id="btnPrix" name="btnPrix" value="Prix" onclick="btnPrix_click()" />
+								</td>
+								<td>
+									<input type="button" class="btnAction" id="btnOk" name="btnOk" value="OK" onclick="addTr_click()" />
+								</td>
+							</tr>
+							<tr>
+								<td>
+									&nbsp;
+								</td>
+								<td colspan="3">
+									<input type="button" class="btnAction" id="btnReset" name="btnReset" value="RESET" onclick="btnReset_click()" />
+								</td>
+							</tr>
+							<tr>
+								<td colspan="4">
+									<input type="text" id="txtbox" name="txtbox" value=0 readonly />
+								</td>
+							</tr>
+						</table>
+					</form>
+				</div>
+				<div id="lesItems">
+					<p id="pFac">Facture</p>
+					<table id="tableItems" border="1">
+						<tr>
+							<th>
+								Description
+							</th>
+							<th>
+								Quantité
+							</th>
+							<th>
+								Prix unitaire
+							</th>
+							<th>
+								Total
+							</th>
+						</tr>
+					</table>
+				</div>
+				<div id="sousTotal">
+					<table id="tabletotal">
+					</table><br />
+					<input type="button" class="btnAction" id="btnResetFacture" name="btnResetFacture" style="width:200px;" value="Reseter la facture!" onclick="btnResetFacture_click()" /><br />
+					<input type="button" class="btnAction" id="btnChangerStyle" name="btnChangerStyle" style="width:200px;" value="Changer le style de la page." onclick="btnChangerStyle_click()" /><br />
+				</div>
+			</div>
+		</div>
+	</body>
+</html>

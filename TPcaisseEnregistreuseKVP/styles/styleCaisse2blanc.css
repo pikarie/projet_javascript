@@ -1,0 +1,80 @@
+/*
+#id
+.class
+*/
+
+.btnAction{
+width: 100%;
+height: 100%;
+}
+
+.btnNo{
+width: 100%;
+height: 100%;
+}
+
+#maTable{
+border-style:solid;
+border-collapse:collapse;
+margin:auto;
+}
+
+#tableItems td{
+border:1px solid black;
+}
+
+#tableItems{
+margin:auto; /*centre*/
+text-align:right;
+border-style:solid;
+border-collapse:collapse;
+}
+
+#wrapper{
+margin:auto;
+width:1000px;
+height:600px;
+padding:10px;
+}
+
+#txtbox{
+width:99%;
+text-align:right;
+}
+
+.txt{
+text-align:right;
+}
+
+#pFac{
+text-align:center;
+}
+
+#tableItems th{
+width:100px;
+height:25px;
+text-align:center;
+}
+
+#tabletotal{
+text-align:right;
+border-collapse:collapse;
+border-bottom:none;
+margin:auto;
+}
+
+#tabletotal td{
+border:1px solid black;
+width:100px;
+height:25px;
+text-align:right;
+border-top:none;
+}
+#sousTotal{
+margin:auto;
+width:50%;
+text-align:center;
+}
+#celltotal{
+color:red;
+}

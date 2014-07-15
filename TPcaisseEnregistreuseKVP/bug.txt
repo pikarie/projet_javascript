@@ -1,0 +1,5 @@
+-text-align colonne description au centre et non a droite (même chose pour quantité)
+-le bouton reset facture reset aussi le style!
+
+prof: 260 lignes de code
+ moi: 424 lignes de code =)
